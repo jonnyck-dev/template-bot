@@ -1,6 +1,5 @@
-import json, requests, sys, os, re, rag
+import json, requests, sys, os, re, rag, provider
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
 DEFAULT_MODEL = "gemma4:e2b-it-qat"
 DEFAULT_CONTEXT = 131072
 BUSINESS_NAME = rag.get_business_name()
@@ -23,25 +22,23 @@ REGLAS ESTRICTAS (sin excepciones):
 9. Responde en el MISMO IDIOMA en que el usuario te escribio la pregunta."""
 
     if thinking:
-        base = base.replace(
-            "Eres un asistente",
-            "Eres un asistente\n\nAntes de responder, piensa paso a paso y muestra tu razonamiento interno entre las etiquetas  response y luego da tu respuesta final."
-        )
+        base = base.replace("Eres un asistente", "Eres un asistente\n\nAntes de responder, piensa paso a paso y muestra tu razonamiento interno entre las etiquetas  response y luego da tu respuesta final.")
     return base
 
 thinking_enabled = False
 show_thinking = False
-current_model = DEFAULT_MODEL
-context_size = DEFAULT_CONTEXT
+current_model = provider.load_config().get("model", DEFAULT_MODEL)
+context_size = provider.load_config().get("context_size", DEFAULT_CONTEXT)
 rag_k = 2
 session_on = False
 history = []
+current_provider = provider.load_config().get("provider", "ollama")
 
 def get_system_prompt():
     return build_system_prompt(thinking=thinking_enabled)
 
 def get_temperature():
-    return 0.5 if thinking_enabled else 0.1
+    return 0.5 if thinking_enabled else provider.load_config().get("temperature", 0.1)
 
 def build_user_message(pregunta):
     context = rag.get_relevant_context(pregunta, k=rag_k)
@@ -60,41 +57,39 @@ def strip_reasoning(texto):
     return re.sub(r"<reasoning>[\s\S]*?</reasoning>", "", texto).strip()
 
 def ask(pregunta):
-    global history, session_on, thinking_enabled, current_model, show_thinking, context_size
+    global history, session_on, thinking_enabled, show_thinking
+
     user_msg = build_user_message(pregunta)
+    system_prompt = get_system_prompt()
 
     if session_on:
-        messages = [
-            {"role": "system", "content": get_system_prompt()},
-            *history,
-            {"role": "user", "content": user_msg},
-        ]
+        messages = [{"role": "system", "content": system_prompt}, *history, {"role": "user", "content": user_msg}]
     else:
-        messages = [
-            {"role": "system", "content": get_system_prompt()},
-            {"role": "user", "content": user_msg},
-        ]
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_msg}]
 
-    payload = {
-        "model": current_model,
-        "messages": messages,
-        "stream": True,
-        "options": {"temperature": get_temperature(), "num_ctx": context_size},
-    }
+    config = provider.load_config()
+    config["provider"] = current_provider
+    config["context_size"] = context_size
+    config["temperature"] = get_temperature()
 
-    response = requests.post(OLLAMA_URL, json=payload, stream=True, timeout=300)
     full_content = ""
-
-    for line in response.iter_lines():
-        if not line:
-            continue
-        chunk = json.loads(line)
-        delta = chunk.get("message", {}).get("content", "")
-        if not delta:
-            continue
-        full_content += delta
-        sys.stdout.write(delta)
-        sys.stdout.flush()
+    try:
+        for token in provider.chat(messages, stream=True, config=config, model=current_model):
+            full_content += token
+            sys.stdout.write(token)
+            sys.stdout.flush()
+    except requests.exceptions.ConnectionError:
+        print("\nError: No se puede conectar. Verifica que el servidor este corriendo.")
+        return ""
+    except requests.exceptions.Timeout:
+        print("\nError: La consulta excedio el tiempo de espera.")
+        return ""
+    except ValueError as e:
+        print(f"\nError: {e}")
+        return ""
+    except Exception as e:
+        print(f"\nError inesperado: {e}")
+        return ""
 
     print()
 
@@ -108,10 +103,13 @@ def ask(pregunta):
     return full_content
 
 def mostrar_status():
+    pinfo = provider.get_provider_info()
     print()
     print("=" * 50)
     print(f"  Negocio:    {BUSINESS_NAME}")
+    print(f"  Proveedor:  {current_provider}")
     print(f"  Modelo:     {current_model}")
+    print(f"  API Key:    {'CONFIGURADA' if pinfo['api_key_set'] else 'NO CONFIGURADA'} (si requiere)")
     print(f"  Contexto:   {context_size}")
     print(f"  RAG top-K:  {rag_k}")
     print(f"  Sesion:     {'ACTIVADA' if session_on else 'DESACTIVADA'}")
@@ -124,11 +122,10 @@ def mostrar_status():
     print("=" * 50)
 
 def procesar_comando(entrada):
-    global session_on, thinking_enabled, current_model, context_size, history, show_thinking, rag_k
+    global session_on, thinking_enabled, current_model, context_size, history, show_thinking, rag_k, current_provider
 
     texto = entrada.lower()
-    if texto.startswith("/"):
-        texto = texto[1:]
+    if texto.startswith("/"): texto = texto[1:]
     partes = texto.split()
     comando = partes[0]
 
@@ -141,9 +138,10 @@ def procesar_comando(entrada):
         print("  Comandos:")
         print("  /salir                 Terminar sesion")
         print("  /session               Activar/desactivar historial")
-        print("  /think                 Activar/desactivar razonamiento del modelo")
-        print("  /showthink             Mostrar/ocultar el razonamiento en pantalla")
-        print("  /model <nombre>        Cambiar modelo (ej: /model qwen3.5:9b)")
+        print("  /think                 Activar/desactivar razonamiento")
+        print("  /showthink             Mostrar/ocultar razonamiento")
+        print("  /model <nombre>        Cambiar modelo (ej: /model gpt-4o)")
+        print("  /provider <nombre>     Cambiar proveedor: ollama, openai, gemini, claude, opencode-go, opencode-zen")
         print("  /context <numero>      Cambiar contexto (ej: /context 65536)")
         print("  /rag <numero>          Cambiar top-K de RAG (ej: /rag 3)")
         print("  /status                Ver configuracion actual")
@@ -175,17 +173,32 @@ def procesar_comando(entrada):
     if comando == "model":
         if len(partes) < 2:
             print(f"Modelo actual: {current_model}")
-            print("Usa: /model <nombre>  (ej: /model qwen3.5:9b)")
+            print("Usa: /model <nombre>  (ej: /model gpt-4o)")
         else:
             current_model = partes[1]
             history = []
             print(f"Modelo cambiado a: {current_model}")
         return "ok"
 
+    if comando == "provider":
+        validos = ["ollama", "openai", "gemini", "claude", "opencode-go", "opencode-zen"]
+        if len(partes) < 2:
+            print(f"Proveedor actual: {current_provider}")
+            print("Usa: /provider <nombre>")
+            print(f"Validos: {', '.join(validos)}")
+        elif partes[1] not in validos:
+            print(f"Proveedor invalido: {partes[1]}")
+            print(f"Validos: {', '.join(validos)}")
+        else:
+            current_provider = partes[1]
+            history = []
+            print(f"Proveedor cambiado a: {current_provider}")
+        return "ok"
+
     if comando == "context":
         if len(partes) < 2:
             print(f"Contexto actual: {context_size}")
-            print("Usa: /context <numero>  (ej: /context 65536)")
+            print("Usa: /context <numero>")
         else:
             try:
                 nuevo = int(partes[1])
@@ -217,6 +230,7 @@ def procesar_comando(entrada):
     if comando == "debug":
         sample_msg = build_user_message("[PRUEBA]")
         print("\n" + "=" * 60)
+        print(f"PROVEEDOR: {current_provider} | MODELO: {current_model}")
         print(f"SYSTEM PROMPT ({len(get_system_prompt())} chars):")
         print(get_system_prompt())
         print("\n---")
@@ -227,18 +241,10 @@ def procesar_comando(entrada):
 
     if comando == "test":
         print("\nEjecutando pruebas rapidas...")
-        tests = [
-            f"Que es {BUSINESS_NAME}?",
-            "Cuales son los servicios disponibles?",
-            "hola",
-            "gracias",
-        ]
+        tests = [f"Que es {BUSINESS_NAME}?", "Cuales son los servicios disponibles?", "hola", "gracias"]
         for t in tests:
             print(f"\n>>> {t}")
-            try:
-                ask(t)
-            except Exception as e:
-                print(f"<<< Error: {e}")
+            ask(t)
         return "ok"
 
     return "unknown"
@@ -249,8 +255,7 @@ def main():
     os.system("cls" if os.name == "nt" else "clear")
     print("=" * 60)
     print(f"  {BUSINESS_NAME} - Chat interactivo")
-    if TAGLINE:
-        print(f"  {TAGLINE}")
+    if TAGLINE: print(f"  {TAGLINE}")
     print("=" * 60)
     mostrar_status()
     print("  Usa /help para ver comandos")
@@ -262,26 +267,12 @@ def main():
         except (EOFError, KeyboardInterrupt):
             print("\n")
             break
-
-        if not entrada:
-            continue
-
+        if not entrada: continue
         if entrada.startswith("/"):
             resultado = procesar_comando(entrada)
-            if resultado == "exit":
-                break
+            if resultado == "exit": break
             continue
-
-        try:
-            ask(entrada)
-        except requests.exceptions.ConnectionError:
-            print("\nError: No se puede conectar con Ollama.")
-        except requests.exceptions.Timeout:
-            print("\nError: La consulta excedio el tiempo de espera (300s).")
-        except json.JSONDecodeError:
-            print(f"\nError: Respuesta invalida. Usa /model <otro>.")
-        except Exception as e:
-            print(f"\nError inesperado: {e}")
+        ask(entrada)
 
 if __name__ == "__main__":
     main()

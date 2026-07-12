@@ -20,9 +20,9 @@ Este template esta inspirado en **Janus Bot**, un asistente informativo sobre JA
 ## 📋 Requisitos
 
 - **Python 3.10+**
-- **Ollama** corriendo localmente en `localhost:11434`
-- **Modelo** `gemma4:e2b-it-qat` descargado (`ollama pull gemma4:e2b-it-qat`)
-- Librerias: `requests`, `sentence-transformers`, `numpy` (`pip install requests sentence-transformers numpy`)
+- Librerias: `pip install requests numpy sentence-transformers`
+- Opcional: **Ollama** corriendo en `localhost:11434` (si usas provider ollama)
+- Opcional: **API key** de OpenAI, Google, Anthropic u OpenCode (segun el provider)
 
 ---
 
@@ -32,7 +32,7 @@ Este template esta inspirado en **Janus Bot**, un asistente informativo sobre JA
 
 Haz fork a este template para tener tu propia copia.
 
-### 2. Configura tu negocio
+### 2. Configura tu negocio y proveedor
 
 Edita `config.json`:
 
@@ -40,13 +40,33 @@ Edita `config.json`:
 {
   "business_name": "Tu Negocio",
   "tagline": "Tu eslogan aqui",
-  "language": "es"
+  "language": "es",
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "api_key": "",
+  "base_url": "",
+  "temperature": 0.1,
+  "context_size": 131072
 }
 ```
 
+### Proveedores soportados
+
+| Provider | Descripcion | Requiere | Default model |
+|----------|------------|----------|---------------|
+| `ollama` | Local con Ollama | Tener Ollama instalado | gemma4:e2b-it-qat |
+| `openai` | OpenAI API | API key | gpt-4o |
+| `gemini` | Google Gemini API | API key (GEMINI_API_KEY) | gemini-2.0-flash |
+| `claude` | Anthropic Claude API | API key (ANTHROPIC_API_KEY) | claude-sonnet-4-20250514 |
+| `opencode-go` | OpenCode Go (suscripcion $10/mes) | OPENCODE_API_KEY | deepseek-v4-flash |
+| `opencode-zen` | OpenCode Zen (modelos gratis + premium) | OPENCODE_API_KEY | deepseek-v4-flash-free |
+
+La API key puede ir en `config.json` o en variables de entorno (`OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENCODE_API_KEY`).
+Si `base_url` esta vacio, se usa el endpoint oficial de cada proveedor.
+
 ### 3. Agrega tu base de conocimiento
 
-Reemplaza los archivos en `CONOCIMIENTOBASE/` con la informacion de TU negocio. Crea tantos archivos `.md` como temas necesites:
+Reemplaza los archivos en `CONOCIMIENTOBASE/` con la informacion de TU negocio:
 
 ```
 CONOCIMIENTOBASE/
@@ -63,16 +83,13 @@ CONOCIMIENTOBASE/
 python build_knowledge.py
 ```
 
-Esto genera `knowledge.json` con toda la informacion estructurada.
-
 ### 5. Genera embeddings (RAG)
 
 ```bash
 python build_embeddings.py
 ```
 
-Esto genera `embeddings.json` con vectores semanticos de cada seccion.
-El bot solo inyectara al prompt las **2 secciones mas relevantes** a cada pregunta, en lugar de toda la base.
+Esto permite que el bot solo inyecte al prompt las **2 secciones mas relevantes** a cada pregunta.
 
 ### 6. Inicia el chat
 
@@ -86,10 +103,11 @@ python test_bot.py
 |---------|-------------|
 | `/help` | Mostrar ayuda |
 | `/think` | Mostrar/ocultar pensamiento del modelo |
-| `/model modelo` | Cambiar modelo de Ollama |
+| `/model modelo` | Cambiar modelo (ej: /model gpt-4o) |
+| `/provider nombre` | Cambiar proveedor: ollama, openai, gemini, claude, opencode-go, opencode-zen |
 | `/context numero` | Cambiar tamano de contexto |
 | `/rag numero` | Cambiar top-K de RAG (ej: /rag 3) |
-| `/session nombre` | Cambiar nombre de sesion |
+| `/session` | Activar/desactivar historial |
 | `/showthink` | Ver ultimo pensamiento del modelo |
 | `/debug` | Ver prompt completo enviado |
 | `/test` | Ejecutar bateria de pruebas rapidas |
@@ -101,72 +119,54 @@ python test_bot.py
 python api.py
 ```
 
-El servidor corre en `http://localhost:8010`.
-
-Endpoints:
-- `POST /api/chat` - Streaming SSE
-- `POST /api/chat/sync` - Respuesta completa
-- `GET /health` - Estado del servidor
+El servidor corre en `http://localhost:8010`. Endpoints: `/api/chat` (SSE), `/api/chat/sync`, `/health`.
+Puedes pasar `provider` y `model` en el body del request para sobreescribir config.json.
 
 ### 8. Despliega el frontend
 
-La carpeta `FRONTEND/` contiene una interfaz de chat lista para desplegar en **Vercel**:
-
-```bash
-cd FRONTEND
-```
-
-Conecta la carpeta a Vercel o simplemente arrastra la carpeta a vercel.com.
-
-**Importante**: En `FRONTEND/app.js` cambia `API_BASE` por la URL de tu API (ej: tu tunel de Cloudflare).
+La carpeta `FRONTEND/` contiene interfaz de chat para Vercel.
+En `FRONTEND/app.js` cambia `API_BASE` por la URL de tu API.
 
 ### 9. Widget embebido (flotante)
-
-Agrega el asistente a **cualquier pagina web** con una sola linea:
 
 ```html
 <script src="widget.js" data-api-base="http://localhost:8010" data-business="Tu Negocio"></script>
 ```
-
-Aparecera un boton flotante en la esquina inferior derecha. Sin iframes, sin configuracion extra.
 
 ---
 
 ## 🎨 Personalizacion
 
 ### Colores del chat
-
-Edita `FRONTEND/style.css` y cambia los valores de `#00BFFF` (azul electrico) por los colores de tu marca.
+Edita `FRONTEND/style.css` - cambia `#00BFFF` por los colores de tu marca.
 
 ### System prompt
+Edita `api.py` y `test_bot.py` para ajustar tono, reglas y comportamiento.
 
-Edita `api.py` y `test_bot.py` para ajustar el tono, reglas y comportamiento del asistente.
-
-### Modelo de IA
-
-Por defecto usa `gemma4:e2b-it-qat`. Cambialo en `api.py`.
+### Modelo / Proveedor
+Edita `config.json` o usa `/provider` y `/model` en tiempo real.
 
 ## 📁 Estructura del proyecto
 
 ```
 template-bot/
-├── config.json                   # Configuracion del negocio
+├── config.json                   # Configuracion (negocio + proveedor)
 ├── CONOCIMIENTOBASE/             # Archivos fuente de conocimiento (.md)
-│   └── 01-ejemplo-barberking.md  # Ejemplo incluido
 ├── build_knowledge.py            # Compila .md -> knowledge.json
 ├── build_embeddings.py           # Genera embeddings para RAG
 ├── rag.py                        # Busqueda semantica (RAG)
-├── knowledge.json                # Base de conocimiento compilada (generado)
-├── embeddings.json               # Vectores semanticos (generado)
-├── api.py                        # Servidor FastAPI (puerto 8010)
+├── provider.py                   # Capa de abstraccion de APIs (Ollama, OpenAI, Gemini, Claude, OpenCode Go/Zen)
+├── knowledge.json                # Base de conocimiento compilada
+├── embeddings.json               # Vectores semanticos
+├── api.py                        # Servidor FastAPI
 ├── test_bot.py                   # Chat interactivo por consola
-├── FRONTEND/                     # Interfaz de chat para Vercel + widget
-│   ├── index.html                # Pagina completa
-│   ├── style.css                 # Estilos
-│   ├── app.js                    # Logica de la pagina completa
-│   ├── widget.js                 # Widget flotante embebible
-│   └── widget-demo.html          # Demo del widget
-├── vercel.json                   # Config para Vercel
+├── FRONTEND/                     # Interfaz web + widget
+│   ├── index.html
+│   ├── style.css
+│   ├── app.js
+│   ├── widget.js
+│   └── widget-demo.html
+├── vercel.json
 └── README.md
 ```
 
@@ -175,7 +175,6 @@ template-bot/
 ## 🔒 Reglas anti-alucinacion
 
 El system prompt incluye reglas estrictas para que el bot:
-
 - Responda SOLO con la informacion proporcionada
 - Rechace preguntas fuera de dominio
 - No invente datos, precios ni especificaciones
@@ -185,8 +184,6 @@ El system prompt incluye reglas estrictas para que el bot:
 ---
 
 ## 🌐 Despliegue completo con Cloudflare Tunnel
-
-Para que tu API sea accesible desde internet:
 
 ```bash
 cloudflared tunnel --url http://localhost:8010
@@ -199,13 +196,13 @@ Luego actualiza `FRONTEND/app.js` con la URL generada.
 ## 📝 Requisitos del concurso
 
 Este template cumple con:
-
 - ✅ 10+ datos concretos en la base de conocimiento
 - ✅ Respuesta "No dispongo de esa informacion" cuando falta data
 - ✅ Tono y personalidad definidos en el system prompt
 - ✅ Rechazo de preguntas fuera de dominio
-- ✅ Embeddable como widget chat (frontend listo para Vercel + widget flotante)
-- ✅ RAG (busqueda semantica) — solo inyecta la informacion relevante a cada pregunta
+- ✅ Embeddable como widget chat
+- ✅ RAG (busqueda semantica)
+- ✅ Multi-proveedor (Ollama, OpenAI, Gemini, Claude, OpenCode Go/Zen)
 
 ---
 

@@ -1,5 +1,11 @@
 {
   "business_name": "Barber King",
   "tagline": "Estilo que te define",
-  "language": "es"
+  "language": "es",
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "api_key": "",
+  "base_url": "",
+  "temperature": 0.1,
+  "context_size": 131072
 }
