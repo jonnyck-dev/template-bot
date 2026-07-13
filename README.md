@@ -61,7 +61,19 @@ Edita `config.json`:
 | `opencode-go` | OpenCode Go (suscripcion $10/mes) | OPENCODE_API_KEY | deepseek-v4-flash |
 | `opencode-zen` | OpenCode Zen (modelos gratis + premium) | OPENCODE_API_KEY | deepseek-v4-flash-free |
 
-La API key puede ir en `config.json` o en variables de entorno (`OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENCODE_API_KEY`).
+### Variables de entorno
+
+Las API keys tambien pueden configurarse como variables de entorno en lugar de `config.json`:
+
+| Variable | Proveedor |
+|----------|-----------|
+| `OPENAI_API_KEY` | OpenAI |
+| `GEMINI_API_KEY` | Google Gemini |
+| `ANTHROPIC_API_KEY` | Anthropic Claude |
+| `OPENCODE_API_KEY` | OpenCode Go / Zen |
+
+Si la variable existe, tiene prioridad sobre `api_key` en `config.json`.
+Ollama no requiere API key.
 Si `base_url` esta vacio, se usa el endpoint oficial de cada proveedor.
 
 ### 3. Agrega tu base de conocimiento
@@ -97,7 +109,9 @@ Esto permite que el bot solo inyecte al prompt las **2 secciones mas relevantes*
 python test_bot.py
 ```
 
-### Comandos disponibles en el chat:
+### Comandos disponibles en el chat (solo terminal de prueba):
+
+Estos comandos solo funcionan en `test_bot.py`. El widget y el API **solo aceptan preguntas** — no exponen comandos ni cambios de configuracion.
 
 | Comando | Descripcion |
 |---------|-------------|
@@ -120,7 +134,6 @@ python api.py
 ```
 
 El servidor corre en `http://localhost:8020`. Endpoints: `/api/chat` (SSE), `/api/chat/sync`, `/health`.
-Puedes pasar `provider` y `model` en el body del request para sobreescribir config.json.
 
 ### 8. Despliega el frontend
 
@@ -133,6 +146,8 @@ En `FRONTEND/app.js` cambia `API_BASE` por la URL de tu API.
 <script src="widget.js" data-api-base="http://localhost:8020" data-business="Tu Negocio"></script>
 ```
 
+> **Seguridad:** El widget solo procesa preguntas. No expone comandos ni permite cambios de configuracion desde el frontend.
+
 ---
 
 ## 🎨 Personalizacion
@@ -144,7 +159,7 @@ Edita `FRONTEND/style.css` - cambia `#00BFFF` por los colores de tu marca.
 Edita `api.py` y `test_bot.py` para ajustar tono, reglas y comportamiento.
 
 ### Modelo / Proveedor
-Edita `config.json` o usa `/provider` y `/model` en tiempo real.
+Edita `config.json` y reinicia el servidor.
 
 ## 📁 Estructura del proyecto
 
