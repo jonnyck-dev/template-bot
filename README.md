@@ -167,12 +167,12 @@ Edita `config.json` y reinicia el servidor.
 template-bot/
 ├── config.json                   # Configuracion (negocio + proveedor)
 ├── CONOCIMIENTOBASE/             # Archivos fuente de conocimiento (.md)
-├── build_knowledge.py            # Compila .md -> knowledge.json
-├── build_embeddings.py           # Genera embeddings para RAG
+├── build_knowledge.py            # Compila .md -> knowledge.json (auto al iniciar api.py)
+├── build_embeddings.py           # (Opcional) Genera embeddings para RAG
 ├── rag.py                        # Busqueda semantica (RAG)
 ├── provider.py                   # Capa de abstraccion de APIs (Ollama, OpenAI, Gemini, Claude, OpenCode Go/Zen)
-├── knowledge.json                # Base de conocimiento compilada
-├── embeddings.json               # Vectores semanticos
+├── knowledge.json                # Base de conocimiento compilada (auto-generado)
+├── embeddings.json               # Vectores semanticos (opcional)
 ├── api.py                        # Servidor FastAPI
 ├── test_bot.py                   # Chat interactivo por consola
 ├── FRONTEND/                     # Interfaz web + widget
@@ -221,5 +221,5 @@ Este template cumple con:
 
 ---
 
-Hecho con ❤️ por [Jonnyck Dev](https://github.com/jonnyckdev)
+Hecho con ❤️ por [Jonnyck Dev](https://github.com/jonnyck-dev)
 

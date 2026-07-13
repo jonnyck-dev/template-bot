@@ -1,10 +1,24 @@
-import json, requests, asyncio, re, rag, provider
+﻿import json, requests, asyncio, re, rag, provider, os, glob
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-import os
+
+md_files = glob.glob("CONOCIMIENTOBASE/*.md")
+needs_build = False
+if not os.path.exists("knowledge.json"):
+    needs_build = True
+elif md_files:
+    knowledge_mtime = os.path.getmtime("knowledge.json")
+    newest_md = max(os.path.getmtime(f) for f in md_files)
+    if newest_md > knowledge_mtime:
+        needs_build = True
+
+if needs_build:
+    import build_knowledge
+    build_knowledge.build()
+    print("knowledge.json auto-built")
 
 BUSINESS_NAME = rag.get_business_name()
 TAGLINE = rag.get_tagline()
