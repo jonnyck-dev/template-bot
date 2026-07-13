@@ -49,11 +49,23 @@
         .slide-4 .col code { background: rgba(0,0,0,0.08); padding: 3px 8px; border-radius: 4px; font-size: 18px; }
 
         /* Slide 5 - RAG */
-        .slide-5 h2 { font-size: 52px; color: #1B2A4A; margin-bottom: 40px; font-weight: 800; border-left: 6px solid #D4A843; padding-left: 20px; }
-        .slide-5 .diagram { display: flex; justify-content: space-around; align-items: center; gap: 15px; }
-        .slide-5 .box { background: #1B2A4A; color: white; padding: 25px 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: 600; flex: 1; border-bottom: 4px solid #D4A843; }
-        .slide-5 .arrow { font-size: 40px; color: #D4A843; font-weight: bold; }
-        .slide-5 .description { margin-top: 40px; font-size: 22px; color: #1B2A4A; text-align: center; line-height: 1.5; max-width: 900px; margin-left: auto; margin-right: auto; }
+        .slide-5 h2 { font-size: 52px; color: #1B2A4A; margin-bottom: 10px; font-weight: 800; border-left: 6px solid #D4A843; padding-left: 20px; }
+        .slide-5 .flow { display: flex; justify-content: center; align-items: center; gap: 0; margin-top: 10px; }
+        .slide-5 .step { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .slide-5 .step .icon { width: 85px; height: 85px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 6px; border: 3px solid; }
+        .slide-5 .step .label { font-size: 14px; font-weight: 700; color: #1B2A4A; text-transform: uppercase; letter-spacing: 0.5px; }
+        .slide-5 .step .sub { font-size: 12px; color: #666; margin-top: 2px; }
+        .slide-5 .step .icon.q { background: #e3f2fd; border-color: #2196f3; }
+        .slide-5 .step .icon.e { background: #e8f5e9; border-color: #4caf50; }
+        .slide-5 .step .icon.k { background: #fff3e0; border-color: #ff9800; }
+        .slide-5 .step .icon.r { background: #fce4ec; border-color: #e91e63; }
+        .slide-5 .step .icon.d { background: #1B2A4A; border-color: #D4A843; }
+        .slide-5 .connector { width: 70px; height: 4px; background: linear-gradient(to right, #D4A843, #1B2A4A); margin: 0 10px; position: relative; top: -22px; flex-shrink: 0; }
+        .slide-5 .connector::before { content: "\25B6"; position: absolute; right: -10px; top: -9px; font-size: 14px; color: #D4A843; }
+        .slide-5 .kb-box { margin: 15px auto 0; background: #f8f9fa; border: 2px dashed #1B2A4A; border-radius: 12px; padding: 10px 25px; max-width: 480px; display: flex; align-items: center; gap: 12px; }
+        .slide-5 .kb-box .db-icon { font-size: 28px; }
+        .slide-5 .kb-box .db-text { font-size: 16px; color: #1B2A4A; font-weight: 600; }
+        .slide-5 .kb-box .db-sub { font-size: 13px; color: #666; }
 
         /* Slide 6 - Multi-proveedor */
         .slide-6 h2 { font-size: 52px; color: #1B2A4A; margin-bottom: 40px; font-weight: 800; text-align: center; border-left: 6px solid #D4A843; padding-left: 20px; }
@@ -159,20 +171,48 @@
         <div class="slide-number">4/9</div>
     </div>
 
-    <!-- Slide 5: RAG -->
+        <!-- Slide 5: RAG -->
     <div class="slide slide-5">
         <div class="gold-bar"></div>
         <h2>RAG — Búsqueda Semántica</h2>
-        <div class="diagram">
-            <div class="box">Pregunta</div>
-            <div class="arrow">→</div>
-            <div class="box">Embeddings</div>
-            <div class="arrow">→</div>
-            <div class="box">Top-K Fragmentos</div>
-            <div class="arrow">→</div>
-            <div class="box">Respuesta</div>
+        <div class="flow">
+            <div class="step">
+                <div class="icon q">🔍</div>
+                <div class="label">Pregunta</div>
+                <div class="sub">Texto del usuario</div>
+            </div>
+            <div class="connector"></div>
+            <div class="step">
+                <div class="icon e">🧩</div>
+                <div class="label">Embeddings</div>
+                <div class="sub">Vectorización</div>
+            </div>
+            <div class="connector"></div>
+            <div class="step">
+                <div class="icon k">🎯</div>
+                <div class="label">Top-K</div>
+                <div class="sub">Fragmentos relevantes</div>
+            </div>
+            <div class="connector"></div>
+            <div class="step">
+                <div class="icon r">🔄</div>
+                <div class="label">Contexto</div>
+                <div class="sub">Prompt + fragmentos</div>
+            </div>
+            <div class="connector"></div>
+            <div class="step">
+                <div class="icon d">💬</div>
+                <div class="label" style="color:#D4A843">Respuesta</div>
+                <div class="sub" style="color:#aaa">Solo con datos reales</div>
+            </div>
         </div>
-        <p class="description">Solo inyecta los fragmentos relevantes a cada pregunta.<br>Documentación enorme sin saturar el contexto del modelo.</p>
+        <div class="kb-box">
+            <div class="db-icon">📦</div>
+            <div style="text-align:left">
+                <div class="db-text">Base de Conocimiento</div>
+                <div class="db-sub">CONOCIMIENTOBASE/ *.md  →  embeddings.json</div>
+            </div>
+        </div>
         <div class="slide-number">5/9</div>
     </div>
 
