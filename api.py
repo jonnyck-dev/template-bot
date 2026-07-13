@@ -1,8 +1,10 @@
-﻿import json, requests, asyncio, re, rag, provider
-from fastapi import FastAPI, HTTPException
+import json, requests, asyncio, re, rag, provider
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+import os
 
 BUSINESS_NAME = rag.get_business_name()
 TAGLINE = rag.get_tagline()
@@ -79,6 +81,42 @@ async def chat_stream(req: ChatRequest):
         try:
             for token in provider.chat(messages, stream=True, config=config):
                 yield f"data: {json.dumps({'token': token, 'done': False})}\n\n"
+                await asyncio.sleep(0)
+            yield f"data: {json.dumps({'token': '', 'done': True})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e), 'done': True})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.get("/api/stream")
+async def chat_stream_get(
+    q: str = Query(..., description="Pregunta del usuario"),
+    model: str = Query(""),
+    provider_name: str = Query(""),
+    rag_k: int = Query(2),
+):
+    if not q.strip():
+        raise HTTPException(400, "q is required")
+
+    config = provider.load_config()
+    if provider_name: config["provider"] = provider_name
+    if model: config["model"] = model
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": build_user_message(q, k=rag_k)},
+    ]
+
+    async def generate():
+        try:
+            for token in provider.chat(messages, stream=True, config=config):
+                yield f"data: {json.dumps({'token': token, 'done': False})}\n\n"
+                await asyncio.sleep(0)
             yield f"data: {json.dumps({'token': '', 'done': True})}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e), 'done': True})}\n\n"
@@ -111,6 +149,10 @@ async def chat_sync(req: ChatRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
+
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "FRONTEND")
+if os.path.isdir(FRONTEND_DIR):
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,4 +1,4 @@
-﻿const API_BASE = 'http://localhost:8020';
+const API_BASE = 'http://localhost:8020';
 
 let isStreaming = false;
 
@@ -59,7 +59,7 @@ function updateBotMessage(content) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-async function sendMessage(question) {
+function sendMessage(question) {
     if (isStreaming) return;
     if (!question.trim()) return;
 
@@ -71,67 +71,63 @@ async function sendMessage(question) {
     chatInput.value = '';
     showTyping();
 
-    try {
-        const response = await fetch(`${API_BASE}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question }),
-        });
+    var url = API_BASE + '/api/stream?q=' + encodeURIComponent(question);
+    var eventSource = new EventSource(url);
+    var botContent = '';
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+    eventSource.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+
+        if (data.error) {
+            botContent = 'Error: ' + data.error;
+            eventSource.close();
+            return;
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let botContent = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const text = decoder.decode(value);
-            const lines = text.split('\n');
-
-            for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                const data = JSON.parse(line.slice(6));
-
-                if (data.error) {
-                    botContent = `Error: ${data.error}`;
-                    break;
-                }
-
-                if (data.token) {
-                    botContent += data.token;
-                    removeTyping();
-                    updateBotMessage(botContent);
-                }
-
-                if (data.done) {
-                    break;
-                }
-            }
+        if (data.token) {
+            botContent += data.token;
+            removeTyping();
+            updateBotMessage(botContent);
         }
 
+        if (data.done) {
+            eventSource.close();
+        }
+    };
+
+    eventSource.onerror = function() {
+        eventSource.close();
         removeTyping();
         if (!botContent) {
-            updateBotMessage('No se recibio respuesta.');
+            updateBotMessage('Error de conexion.');
         }
-
-    } catch (error) {
-        removeTyping();
-        updateBotMessage(`Error de conexion: ${error.message}`);
-    } finally {
         isStreaming = false;
         chatSend.disabled = false;
         chatInput.disabled = false;
         chatInput.focus();
-    }
+    };
+
+    eventSource.addEventListener('done', function() {
+        eventSource.close();
+    });
+
+    var checkDone = setInterval(function() {
+        if (eventSource.readyState === EventSource.CLOSED) {
+            clearInterval(checkDone);
+            removeTyping();
+            if (!botContent) {
+                updateBotMessage('No se recibio respuesta.');
+            }
+            isStreaming = false;
+            chatSend.disabled = false;
+            chatInput.disabled = false;
+            chatInput.focus();
+        }
+    }, 100);
 }
 
-chatSend.addEventListener('click', () => sendMessage(chatInput.value));
-chatInput.addEventListener('keydown', (e) => {
+chatSend.addEventListener('click', function() { sendMessage(chatInput.value); });
+chatInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage(chatInput.value);
@@ -139,5 +135,3 @@ chatInput.addEventListener('keydown', (e) => {
 });
 
 addMessage('Bienvenido al asistente. Hazme cualquier pregunta sobre el negocio.', 'bot');
-
-
