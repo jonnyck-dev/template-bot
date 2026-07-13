@@ -1,4 +1,4 @@
-﻿const API_BASE = 'http://localhost:8010';
+﻿const API_BASE = 'http://localhost:8020';
 
 let isStreaming = false;
 
@@ -139,3 +139,5 @@ chatInput.addEventListener('keydown', (e) => {
 });
 
 addMessage('Bienvenido al asistente. Hazme cualquier pregunta sobre el negocio.', 'bot');
+
+

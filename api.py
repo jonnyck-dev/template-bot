@@ -1,4 +1,4 @@
-import json, requests, asyncio, re, rag, provider
+﻿import json, requests, asyncio, re, rag, provider
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -114,4 +114,4 @@ async def chat_sync(req: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8010)
+    uvicorn.run(app, host="0.0.0.0", port=8020)

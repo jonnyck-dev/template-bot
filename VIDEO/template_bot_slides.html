@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Bot - Diapositivas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e8e8e8;
+            padding: 40px 0;
+        }
+        
+        .slide {
+            width: 1280px;
+            height: 720px;
+            margin: 0 auto 40px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 80px;
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 18px;
+            color: #999;
+            font-weight: 600;
+        }
+        
+        .gold-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: #D4A843;
+        }
+        
+        /* Slide 1 - Portada */
+        .slide-1 {
+            background: #1B2A4A;
+            color: white;
+            text-align: center;
+        }
+        
+        .slide-1 h1 {
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+        
+        .slide-1 h1 span {
+            color: #D4A843;
+        }
+        
+        .slide-1 .subtitle {
+            font-size: 32px;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .slide-1 .line {
+            width: 80px;
+            height: 4px;
+            background: #D4A843;
+            margin: 40px auto;
+        }
+        
+        /* Slide 2 - Anti-alucinación */
+        .slide-2 h2 {
+            font-size: 52px;
+            color: #1B2A4A;
+            margin-bottom: 40px;
+            font-weight: 800;
+            border-left: 6px solid #D4A843;
+            padding-left: 20px;
+        }
+        
+        .slide-2 .content {
+            display: flex;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .slide-2 .text {
+            flex: 1;
+        }
+        
+        .slide-2 .text p {
+            font-size: 28px;
+            line-height: 1.6;
+            color: #1B2A4A;
+            margin-bottom: 20px;
+        }
+        
+        .slide-2 .example {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 6px solid #D4A843;
+            font-size: 24px;
+            color: #1B2A4A;
+            font-style: italic;
+            margin-top: 30px;
+        }
+        
+        .slide-2 .icon {
+            font-size: 160px;
+            color: #D4A843;
+            opacity: 0.3;
+        }
+        
+        /* Slide 3 - Template */
+        .slide-3 {
+            background: linear-gradient(to right, #1B2A4A 0%, #1B2A4A 45%, white 45%);
+        }
+        
+        .slide-3 .left {
+            width: 45%;
+            color: white;
+            padding-right: 40px;
+        }
+        
+        .slide-3 .left h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            border-left: 6px solid #D4A843;
+            padding-left: 20px;
+        }
+        
+        .slide-3 .left p {
+            font-size: 24px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .slide-3 .right {
+            width: 55%;
+            padding-left: 40px;
+        }
+        
+        .slide-3 .code-block {
+            background: #0d1525;
+            color: #f8f8f2;
+            padding: 40px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 22px;
+            line-height: 1.8;
+            border: 1px solid #D4A843;
+        }
+        
+        .slide-3 .code-block .folder {
+            color: #D4A843;
+            font-weight: bold;
+        }
+        
+        /* Slide 4 - RAG */
+        .slide-4 h2 {
+            font-size: 52px;
+            color: #1B2A4A;
+            margin-bottom: 50px;
+            font-weight: 800;
+            border-left: 6px solid #D4A843;
+            padding-left: 20px;
+        }
+        
+        .slide-4 .diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .slide-4 .box {
+            background: #1B2A4A;
+            color: white;
+            padding: 30px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            flex: 1;
+            border-bottom: 4px solid #D4A843;
+        }
+        
+        .slide-4 .arrow {
+            font-size: 48px;
+            color: #D4A843;
+            font-weight: bold;
+        }
+        
+        .slide-4 .description {
+            margin-top: 50px;
+            font-size: 24px;
+            color: #1B2A4A;
+            text-align: center;
+            line-height: 1.5;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Slide 5 - Multi-proveedor */
+        .slide-5 h2 {
+            font-size: 52px;
+            color: #1B2A4A;
+            margin-bottom: 50px;
+            font-weight: 800;
+            text-align: center;
+            border-left: 6px solid #D4A843;
+            padding-left: 20px;
+        }
+        
+        .slide-5 .providers {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .slide-5 .provider {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #1B2A4A;
+            border: 2px solid #e0e0e0;
+            min-width: 180px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .slide-5 .provider.highlight {
+            background: #D4A843;
+            color: white;
+            border-color: #D4A843;
+        }
+        
+        /* Slide 6 - Widget */
+        .slide-6 {
+            background: #1B2A4A;
+            color: white;
+            text-align: center;
+        }
+        
+        .slide-6 h2 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+        
+        .slide-6 h2 span {
+            color: #D4A843;
+        }
+        
+        .slide-6 .code {
+            background: rgba(0,0,0,0.4);
+            padding: 40px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 22px;
+            margin: 40px auto;
+            max-width: 800px;
+            border: 1px solid #D4A843;
+        }
+        
+        .slide-6 p {
+            font-size: 28px;
+            margin-top: 30px;
+            opacity: 0.9;
+        }
+        
+        /* Slide 7 - Demo */
+        .slide-7 h2 {
+            font-size: 52px;
+            color: #1B2A4A;
+            margin-bottom: 60px;
+            font-weight: 800;
+            text-align: center;
+            border-left: 6px solid #D4A843;
+            padding-left: 20px;
+        }
+        
+        .slide-7 .steps {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+        }
+        
+        .slide-7 .step {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .slide-7 .step-number {
+            width: 80px;
+            height: 80px;
+            background: #D4A843;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 auto 20px;
+        }
+        
+        .slide-7 .step-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1B2A4A;
+            margin-bottom: 15px;
+        }
+        
+        .slide-7 .step-code {
+            background: #1B2A4A;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            border-bottom: 3px solid #D4A843;
+        }
+        
+        /* Slide 8 - Cierre */
+        .slide-8 {
+            background: #1B2A4A;
+            color: white;
+            text-align: center;
+        }
+        
+        .slide-8 h2 {
+            font-size: 60px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+        
+        .slide-8 h2 span {
+            color: #D4A843;
+        }
+        
+        .slide-8 .links {
+            font-size: 28px;
+            line-height: 2;
+            margin: 40px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .slide-8 .cta {
+            font-size: 32px;
+            font-weight: 600;
+            margin-top: 40px;
+            opacity: 0.9;
+        }
+        
+        .slide-8 .line {
+            width: 80px;
+            height: 4px;
+            background: #D4A843;
+            margin: 30px auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Slide 1: Portada -->
+    <div class="slide slide-1">
+        <h1>Template <span>Bot</span></h1>
+        <div class="line"></div>
+        <p class="subtitle">Haz tu propio asistente IA sin alucinaciones</p>
+        <div class="slide-number">1/8</div>
+    </div>
+
+    <!-- Slide 2: Anti-alucinación -->
+    <div class="slide slide-2">
+        <div class="gold-bar"></div>
+        <h2>No Alucina</h2>
+        <div class="content">
+            <div class="text">
+                <p><strong>Lo importante:</strong> NO inventa información que no tiene</p>
+                <div class="example">
+                    "No dispongo de esa información"
+                </div>
+                <p style="margin-top: 30px; font-size: 22px; color: #666;">Reglas anti-alucinación en el system prompt</p>
+            </div>
+            <div class="icon">✓</div>
+        </div>
+        <div class="slide-number">2/8</div>
+    </div>
+
+    <!-- Slide 3: Template -->
+    <div class="slide slide-3">
+        <div class="left">
+            <h2>Template Reutilizable</h2>
+            <p>Estructura que sirve para cualquier negocio. Solo edita los datos de tu empresa.</p>
+        </div>
+        <div class="right">
+            <div class="code-block">
+                <span class="folder">CONOCIMIENTOBASE/</span><br>
+                ├── precios.md<br>
+                ├── horarios.md<br>
+                ├── politicas.md<br>
+                ├── faq.md<br>
+                └── servicios.md
+            </div>
+        </div>
+        <div class="slide-number">3/8</div>
+    </div>
+
+    <!-- Slide 4: RAG -->
+    <div class="slide slide-4">
+        <div class="gold-bar"></div>
+        <h2>¿Cómo funciona? Arquitectura RAG</h2>
+        <div class="diagram">
+            <div class="box">Query</div>
+            <div class="arrow">→</div>
+            <div class="box">Búsqueda Semántica</div>
+            <div class="arrow">→</div>
+            <div class="box">Fragmentos Relevantes</div>
+            <div class="arrow">→</div>
+            <div class="box">Respuesta</div>
+        </div>
+        <p class="description">Solo inyecta los fragmentos relevantes al prompt. Documentación enorme sin saturar el contexto del modelo.</p>
+        <div class="slide-number">4/8</div>
+    </div>
+
+    <!-- Slide 5: Multi-proveedor -->
+    <div class="slide slide-5">
+        <div class="gold-bar"></div>
+        <h2>Multi-Proveedor</h2>
+        <div class="providers">
+            <div class="provider">Ollama</div>
+            <div class="provider">OpenAI</div>
+            <div class="provider">Gemini</div>
+            <div class="provider">Claude</div>
+            <div class="provider highlight">OpenCode</div>
+        </div>
+        <div class="slide-number">5/8</div>
+    </div>
+
+    <!-- Slide 6: Widget -->
+    <div class="slide slide-6">
+        <h2>Widget <span>Web</span></h2>
+        <div class="code">
+            &lt;script src="widget.js"&gt;&lt;/script&gt;
+        </div>
+        <p>Una línea de HTML en cualquier sitio web</p>
+        <div class="slide-number">6/8</div>
+    </div>
+
+    <!-- Slide 7: Demo -->
+    <div class="slide slide-7">
+        <div class="gold-bar"></div>
+        <h2>3 Pasos</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-title">Clonar</div>
+                <div class="step-code">git clone repo</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-title">Editar</div>
+                <div class="step-code">01-ejemplo.md</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-title">Ejecutar</div>
+                <div class="step-code">build_knowledge.py</div>
+            </div>
+        </div>
+        <div class="slide-number">7/8</div>
+    </div>
+
+    <!-- Slide 8: Cierre -->
+    <div class="slide slide-8">
+        <h2>Open <span>Source</span></h2>
+        <div class="line"></div>
+        <div class="links">
+            github.com/jonnyckdev/template-bot<br>
+            janus-landing-red.vercel.app
+        </div>
+        <p class="cta">Los leo en los comentarios</p>
+        <div class="slide-number">8/8</div>
+    </div>
+</body>
+</html>

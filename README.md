@@ -119,7 +119,7 @@ python test_bot.py
 python api.py
 ```
 
-El servidor corre en `http://localhost:8010`. Endpoints: `/api/chat` (SSE), `/api/chat/sync`, `/health`.
+El servidor corre en `http://localhost:8020`. Endpoints: `/api/chat` (SSE), `/api/chat/sync`, `/health`.
 Puedes pasar `provider` y `model` en el body del request para sobreescribir config.json.
 
 ### 8. Despliega el frontend
@@ -130,7 +130,7 @@ En `FRONTEND/app.js` cambia `API_BASE` por la URL de tu API.
 ### 9. Widget embebido (flotante)
 
 ```html
-<script src="widget.js" data-api-base="http://localhost:8010" data-business="Tu Negocio"></script>
+<script src="widget.js" data-api-base="http://localhost:8020" data-business="Tu Negocio"></script>
 ```
 
 ---
@@ -186,7 +186,7 @@ El system prompt incluye reglas estrictas para que el bot:
 ## 🌐 Despliegue completo con Cloudflare Tunnel
 
 ```bash
-cloudflared tunnel --url http://localhost:8010
+cloudflared tunnel --url http://localhost:8020
 ```
 
 Luego actualiza `FRONTEND/app.js` con la URL generada.
@@ -207,3 +207,4 @@ Este template cumple con:
 ---
 
 Hecho con ❤️ por [Jonnyck Dev](https://github.com/jonnyckdev)
+
