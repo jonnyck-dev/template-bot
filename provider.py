@@ -1,4 +1,4 @@
-import json, os, requests, sys
+﻿import json, os, requests, sys
 CONFIG_FILE = "config.json"
 _config_cache = None
 
@@ -34,7 +34,7 @@ def _chat_ollama(messages, config, model):
     url = base.rstrip("/") + "/api/chat"
     ctx = config.get("context_size", 131072)
     temp = config.get("temperature", 0.1)
-    payload = {"model": model, "messages": messages, "stream": True, "options": {"temperature": temp, "num_ctx": ctx}}
+    payload = {"model": model, "messages": messages, "stream": True, "think": True, "options": {"temperature": temp, "num_ctx": ctx}}
     resp = requests.post(url, json=payload, stream=True, timeout=300)
     for line in resp.iter_lines():
         if not line: continue
