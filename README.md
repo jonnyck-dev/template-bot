@@ -89,21 +89,8 @@ CONOCIMIENTOBASE/
 └── ...
 ```
 
-### 4. Compila base de conocimiento
 
-```bash
-python build_knowledge.py
-```
-
-### 5. Genera embeddings (RAG)
-
-```bash
-python build_embeddings.py
-```
-
-Esto permite que el bot solo inyecte al prompt las **2 secciones mas relevantes** a cada pregunta.
-
-### 6. Inicia el chat
+### 4. Inicia el chat
 
 ```bash
 python test_bot.py
@@ -127,7 +114,7 @@ Estos comandos solo funcionan en `test_bot.py`. El widget y el API **solo acepta
 | `/test` | Ejecutar bateria de pruebas rapidas |
 | `/salir` | Terminar la sesion |
 
-### 7. Inicia el servidor API
+### 5. Inicia el servidor API
 
 ```bash
 python api.py
@@ -135,12 +122,12 @@ python api.py
 
 El servidor corre en `http://localhost:8020`. Endpoints: `/api/chat` (SSE), `/api/chat/sync`, `/health`.
 
-### 8. Despliega el frontend
+### 6. Despliega el frontend
 
 La carpeta `FRONTEND/` contiene interfaz de chat para Vercel.
 En `FRONTEND/app.js` cambia `API_BASE` por la URL de tu API.
 
-### 9. Widget embebido (flotante)
+### 7. Widget embebido (flotante)
 
 ```html
 <script src="widget.js" data-api-base="http://localhost:8020" data-business="Tu Negocio"></script>
