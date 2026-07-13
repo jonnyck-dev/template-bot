@@ -13,7 +13,7 @@ Este template esta inspirado en **Janus Bot**, un asistente informativo sobre JA
 -En mis pruebas Janus Bot demostro que con buena base de conocimiento + system prompt riguroso + un modelo local, se puede crear un bot que NO alucina y responde solo lo que sabe.
 - Este template te da esa misma arquitectura, solo cambias los datos.
 
-👉 **[Janus Bot - Repositorio original](https://github.com/jonnyckdev/janus-bot)**
+👉 **[Janus Bot - Repositorio original](https://github.com/jonnyck-dev/janus-bot)**
 
 ---
 
